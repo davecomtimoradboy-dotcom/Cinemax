@@ -13,6 +13,7 @@ CineMax is a full-stack movie discovery and personal watchlist platform built wi
 - Personalized recommendations
 - Movie detail pages
 - Authorized video/trailer playback
+- Admin video upload for MP4/WebM/OGG files (up to 500 MB)
 - Playback resume/progress
 - Reviews and 1–5 star ratings
 - Personal watchlist
@@ -117,9 +118,13 @@ After changing the role, log in again so a fresh JWT contains the admin role.
 | GET | `/api/admin/users` | Manage users |
 | PATCH | `/api/admin/users/:id/role` | Change user role |
 | DELETE | `/api/admin/users/:id` | Delete user |
-| POST | `/api/admin/movies` | Add movie |
-| PUT | `/api/admin/movies/:id` | Edit movie |
+| POST | `/api/admin/movies` | Add movie with optional video upload |
+| PUT | `/api/admin/movies/:id` | Edit movie and optionally replace video |
 | DELETE | `/api/admin/movies/:id` | Delete movie |
+
+## Video uploads
+
+Administrators can upload an authorized MP4, WebM or OGG video from the Admin Dashboard. Uploaded files are stored in the server's `uploads/` directory and are deliberately excluded from GitHub with `.gitignore`. The current upload limit is 500 MB. For production hosting, use persistent storage or a dedicated video/CDN service because many hosts do not guarantee local disk persistence.
 
 ## Testing
 

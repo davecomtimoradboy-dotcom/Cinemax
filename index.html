@@ -16,13 +16,13 @@
   <a class="brand" href="#home"><span>CINE</span>MAX</a>
   <nav class="desktop-nav">
     <a class="active" href="#home">Home</a><a href="#movies">Movies</a><a href="#genres">Genres</a>
-    <a id="watchLink" href="watchlist.html" style="display:none">My List</a>
-    <a id="profileLink" href="profile.html" style="display:none">Profile</a>
-    <a id="adminLink" href="admin.html" style="display:none">Admin</a>
+    <a id="watchLink" href="watchlist.html" hidden>My List</a>
+    <a id="profileLink" href="profile.html" hidden>Profile</a>
+    <a id="adminLink" href="admin.html" hidden>Admin</a>
   </nav>
   <div class="top-actions">
     <label class="search-pill"><span>⌕</span><input id="searchInput" placeholder="Search titles, genres..." aria-label="Search movies"></label>
-    <a class="login-pill" id="userButton" href="login.html">Login</a>
+    <button class="icon-btn" id="themeButton" title="Toggle theme">◐</button><a class="login-pill" id="userButton" href="login.html">Login</a>
   </div>
 </header>
 
@@ -52,12 +52,14 @@
     <div class="movie-row" id="recommendRow"></div>
   </section>
 
+  <section class="content-section"><div class="section-head"><div><span class="kicker">DISCOVER SOMETHING GREAT</span><h2>Featured</h2></div></div><div class="featured-grid" id="featuredRow"></div></section>
+
   <section class="catalog content-section">
     <div class="section-head">
       <div><span class="kicker">EXPLORE THE COLLECTION</span><h2>Trending right now <span class="red">•</span></h2></div>
-      <div class="filters"><select id="genreFilter"><option value="all">All Genres</option><option>Action</option><option>Sci-Fi</option><option>Drama</option></select></div>
+      <div class="filters"><div class="filter-bar"><select id="genreFilter"><option value="all">All Genres</option><option>Action</option><option>Sci-Fi</option><option>Drama</option></select><select id="sortFilter"><option value="rating">Top Rated</option><option value="year">Newest</option><option value="title">A–Z</option></select></div></div>
     </div>
-    <div class="movie-grid" id="movieGrid"></div>
+    <div class="movie-grid" id="movieGrid"></div><div class="empty-state" id="emptyState" hidden>No movies match your search.</div>
   </section>
 
   <section class="genres-section content-section" id="genres">
@@ -70,6 +72,7 @@
     </div>
   </section>
 </main>
+<nav class="mobile-nav"><a href="#home">⌂<span>Home</span></a><a href="#movies">▣<span>Movies</span></a><a href="watchlist.html">♡<span>My List</span></a><a href="profile.html">●<span>Profile</span></a></nav>
 
 <div class="modal" id="movieModal"><div class="modal-box"><button class="close" onclick="closeModal()">×</button><div class="modal-poster" id="modalPoster"></div><div class="modal-body"><span class="kicker">MOVIE DETAILS</span><h2 id="modalTitle"></h2><p id="modalMeta"></p><p id="modalDescription"></p><button class="primary" id="favoriteModal">♡ Add to Watchlist</button></div></div></div>
 <div class="modal" id="authModal"><div class="auth-box"><button class="close" onclick="closeModal()">×</button><span class="kicker">CINEMAX ACCOUNT</span><h2 id="authTitle">Welcome Back</h2><p>Sign in to save movies and continue watching across your sessions.</p><form id="authForm"><input id="name" placeholder="Full name"><input id="email" type="email" placeholder="Email address" required><input id="password" type="password" placeholder="Password (6+ characters)" required><button class="primary" id="authSubmit" type="submit">Login</button></form></div></div>

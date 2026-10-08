@@ -3,66 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="CineMax - discover movies, search by genre and build your personal watchlist.">
-<title>CineMax | Movie Hub</title>
+<meta name="description" content="CineMax — discover, save and continue watching movies.">
+<title>CineMax | Stream Your Next Favorite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <div class="logo">CINE<span>MAX</span></div>
-  <nav><a href="#home">Home</a><a href="#movies">Movies</a><a href="#genres">Genres</a><a id="watchLink" href="watchlist.html" style="display:none">Watchlist</a><a id="profileLink" href="profile.html" style="display:none">Profile</a><a id="adminLink" href="admin.html" style="display:none">Admin</a></nav>
-  <div class="search"><input id="searchInput" placeholder="Search movies..."><button>🔍</button></div>
-  <a class="user-btn" id="userButton" href="login.html" style="display:flex;align-items:center;text-decoration:none">Login</a>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<header class="topbar">
+  <a class="brand" href="#home"><span>CINE</span>MAX</a>
+  <nav class="desktop-nav">
+    <a class="active" href="#home">Home</a><a href="#movies">Movies</a><a href="#genres">Genres</a>
+    <a id="watchLink" href="watchlist.html" style="display:none">My List</a>
+    <a id="profileLink" href="profile.html" style="display:none">Profile</a>
+    <a id="adminLink" href="admin.html" style="display:none">Admin</a>
+  </nav>
+  <div class="top-actions">
+    <label class="search-pill"><span>⌕</span><input id="searchInput" placeholder="Search titles, genres..." aria-label="Search movies"></label>
+    <a class="login-pill" id="userButton" href="login.html">Login</a>
+  </div>
 </header>
 
 <section class="hero" id="home">
-  <div class="hero-glow"></div><div class="hero-content reveal visible">
-    <div class="eyebrow">WELCOME TO CINEMAX</div>
-    <h1>YOUR NEXT<br><span>FAVORITE MOVIE.</span></h1>
-    <p>Discover movies, search by genre, explore details and save your favorites in one modern movie hub.</p>
-    <div class="hero-actions"><a class="primary" href="#movies">Explore Movies</a><button class="secondary" id="signupButton">Create Account</button></div>
+  <div class="hero-backdrop"></div><div class="hero-noise"></div><div class="hero-glow"></div>
+  <div class="hero-content reveal visible">
+    <div class="hero-tag"><i></i> THE CINEMATIC EXPERIENCE</div>
+    <h1>Movies that<br><em>move you.</em></h1>
+    <p>Discover your next obsession, keep your favorites close, and pick up exactly where you left off.</p>
+    <div class="hero-actions">
+      <a class="primary big" href="#movies">▶ Explore Movies</a>
+      <button class="ghost big" id="signupButton">＋ Join CineMax</button>
+    </div>
+    <div class="hero-meta"><span>● HD EXPERIENCE</span><span>✦ PERSONALIZED</span><span>♡ YOUR WATCHLIST</span></div>
   </div>
+  <div class="hero-scroll">SCROLL TO EXPLORE <b>↓</b></div>
 </section>
 
-<main id="movies"><section class="content-section personal" id="continueSection" hidden><div class="section-head"><div><span class="section-kicker">PICK UP WHERE YOU LEFT OFF</span><h2>Continue Watching</h2></div></div><div class="movie-row" id="continueRow"></div></section><section class="content-section personal" id="recommendSection" hidden><div class="section-head"><div><span class="section-kicker">MADE FOR YOU</span><h2>Recommended For You</h2></div></div><div class="movie-row" id="recommendRow"></div></section>
-  <div class="section-head">
-    <h2>🔥 Trending Movies</h2>
-    <div class="filters">
-      <select id="genreFilter"><option value="all">All Genres</option><option>Action</option><option>Sci-Fi</option><option>Drama</option></select>
+<main id="movies">
+  <section class="personal content-section" id="continueSection" hidden>
+    <div class="section-head"><div><span class="kicker">PICK UP WHERE YOU LEFT OFF</span><h2>Continue Watching</h2></div><span class="section-line"></span></div>
+    <div class="movie-row" id="continueRow"></div>
+  </section>
+
+  <section class="personal content-section" id="recommendSection" hidden>
+    <div class="section-head"><div><span class="kicker">SELECTED FOR YOU</span><h2>Because you might like it</h2></div><span class="section-line"></span></div>
+    <div class="movie-row" id="recommendRow"></div>
+  </section>
+
+  <section class="catalog content-section">
+    <div class="section-head">
+      <div><span class="kicker">EXPLORE THE COLLECTION</span><h2>Trending right now <span class="red">•</span></h2></div>
+      <div class="filters"><select id="genreFilter"><option value="all">All Genres</option><option>Action</option><option>Sci-Fi</option><option>Drama</option></select></div>
     </div>
-  </div>
-  <div class="movie-grid" id="movieGrid"></div>
-  <div class="genre-bar" id="genres">
-    <button onclick="document.getElementById('genreFilter').value='all';loadMovies()">All</button>
-    <button onclick="document.getElementById('genreFilter').value='Action';loadMovies()">Action</button>
-    <button onclick="document.getElementById('genreFilter').value='Sci-Fi';loadMovies()">Sci-Fi</button>
-    <button onclick="document.getElementById('genreFilter').value='Drama';loadMovies()">Drama</button>
-  </div>
+    <div class="movie-grid" id="movieGrid"></div>
+  </section>
+
+  <section class="genres-section content-section" id="genres">
+    <div class="section-head"><div><span class="kicker">FIND YOUR MOOD</span><h2>Browse by genre</h2></div></div>
+    <div class="genre-grid">
+      <button onclick="document.getElementById('genreFilter').value='Action';loadMovies()"><b>01</b><span>Action</span><i>↗</i></button>
+      <button onclick="document.getElementById('genreFilter').value='Sci-Fi';loadMovies()"><b>02</b><span>Sci-Fi</span><i>↗</i></button>
+      <button onclick="document.getElementById('genreFilter').value='Drama';loadMovies()"><b>03</b><span>Drama</span><i>↗</i></button>
+      <button onclick="document.getElementById('genreFilter').value='all';loadMovies();window.scrollTo({top:document.getElementById('movies').offsetTop,behavior:'smooth'})"><b>04</b><span>Everything</span><i>↗</i></button>
+    </div>
+  </section>
 </main>
 
-<div class="modal" id="movieModal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal()">×</button>
-    <div class="modal-poster" id="modalPoster"></div>
-    <div class="modal-body"><h2 id="modalTitle"></h2><p id="modalMeta"></p><p id="modalDescription"></p><button class="primary" id="favoriteModal">♡ Add to Watchlist</button></div>
-  </div>
-</div>
-
-<div class="modal" id="authModal">
-  <div class="auth-box">
-    <button class="close" onclick="closeModal()">×</button>
-    <h2 id="authTitle">Welcome Back</h2>
-    <form id="authForm">
-      <input id="name" placeholder="Full name">
-      <input id="email" type="email" placeholder="Email address" required>
-      <input id="password" type="password" placeholder="Password (6+ characters)" required>
-      <button class="primary" id="authSubmit" type="submit">Login</button>
-    </form>
-  </div>
-</div>
-
+<div class="modal" id="movieModal"><div class="modal-box"><button class="close" onclick="closeModal()">×</button><div class="modal-poster" id="modalPoster"></div><div class="modal-body"><span class="kicker">MOVIE DETAILS</span><h2 id="modalTitle"></h2><p id="modalMeta"></p><p id="modalDescription"></p><button class="primary" id="favoriteModal">♡ Add to Watchlist</button></div></div></div>
+<div class="modal" id="authModal"><div class="auth-box"><button class="close" onclick="closeModal()">×</button><span class="kicker">CINEMAX ACCOUNT</span><h2 id="authTitle">Welcome Back</h2><p>Sign in to save movies and continue watching across your sessions.</p><form id="authForm"><input id="name" placeholder="Full name"><input id="email" type="email" placeholder="Email address" required><input id="password" type="password" placeholder="Password (6+ characters)" required><button class="primary" id="authSubmit" type="submit">Login</button></form></div></div>
 <div class="toast" id="toast"></div>
-<footer><div class="logo">CINE<span>MAX</span></div><p>© 2026 CineMax. Built as a full-stack web project.</p></footer>
+<footer><a class="brand" href="#home"><span>CINE</span>MAX</a><p>© 2026 CineMax · Your personal cinematic universe.</p><div><a href="#home">Back to top ↑</a></div></footer>
 <script src="app.js"></script>
 </body>
 </html>

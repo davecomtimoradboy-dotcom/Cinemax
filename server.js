@@ -122,7 +122,8 @@ const uploadVideo=multer({
     const allowed=["video/mp4","video/webm","video/ogg"];
     const ext=path.extname(file.originalname).toLowerCase();
     const allowedExt=[".mp4",".webm",".ogg"];
-    cb(null,allowed.includes(file.mimetype)&&allowedExt.includes(ext));
+    if(!allowed.includes(file.mimetype)||!allowedExt.includes(ext))return cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE","video"));
+    cb(null,true);
   }
 }).single("video");
 
@@ -295,6 +296,6 @@ app.delete("/api/admin/movies/:id",auth,admin,(req,res)=>{
   else res.status(404).json({message:"Movie not found"});
 });
 
-app.use((err,req,res,next)=>{if(err instanceof multer.MulterError)return res.status(400).json({message:err.message});next(err)});
+app.use((err,req,res,next)=>{if(err instanceof multer.MulterError){const message=err.code==="LIMIT_UNEXPECTED_FILE"?"Only MP4, WebM and OGG video files are supported.":err.code==="LIMIT_FILE_SIZE"?"Video file is too large. Maximum size is 500 MB.":err.message;return res.status(400).json({message});}next(err)});
 app.use((req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.listen(PORT,()=>console.log("CineMax running on http://localhost:"+PORT));

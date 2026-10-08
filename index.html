@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#e50914">
 </head>
 <body>
 <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -78,6 +78,6 @@
 <div class="modal" id="authModal"><div class="auth-box"><button class="close" onclick="closeModal()">×</button><span class="kicker">CINEMAX ACCOUNT</span><h2 id="authTitle">Welcome Back</h2><p>Sign in to save movies and continue watching across your sessions.</p><form id="authForm"><input id="name" placeholder="Full name"><input id="email" type="email" placeholder="Email address" required><input id="password" type="password" placeholder="Password (6+ characters)" required><button class="primary" id="authSubmit" type="submit">Login</button></form></div></div>
 <div class="toast" id="toast"></div>
 <footer><a class="brand" href="#home"><span>CINE</span>MAX</a><p>© 2026 CineMax · Your personal cinematic universe.</p><div><a href="#home">Back to top ↑</a></div></footer>
-<script src="app.js"></script>
+<script src="app.js"></script><script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
 </body>
 </html>

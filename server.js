@@ -8,10 +8,15 @@ const jwt=require("jsonwebtoken");
 const Database=require("better-sqlite3");
 const helmet=require("helmet");
 const rateLimit=require("express-rate-limit");
+const fs=require("fs");
+const crypto=require("crypto");
+const multer=require("multer");
 
 const app=express();
 const PORT=Number(process.env.PORT)||3000;
 const SECRET=process.env.JWT_SECRET||"change-this-secret";
+const UPLOAD_DIR=path.join(__dirname,"uploads");
+fs.mkdirSync(UPLOAD_DIR,{recursive:true});
 
 if(SECRET==="change-this-secret"){
   console.warn("WARNING: Set JWT_SECRET in .env before production.");
@@ -22,6 +27,7 @@ app.use(rateLimit({windowMs:15*60*1000,max:300,standardHeaders:true,legacyHeader
 app.use(cors());
 app.use(express.json({limit:"1mb"}));
 app.use(express.static(__dirname));
+app.use("/uploads",express.static(UPLOAD_DIR,{fallthrough:false}));
 
 const db=new Database("cinemax.db");
 db.pragma("foreign_keys = ON");
@@ -102,6 +108,31 @@ function admin(req,res,next){
 }
 function validId(value){return Number.isInteger(Number(value))&&Number(value)>0}
 function cleanText(value,max=5000){return String(value??"").trim().slice(0,max)}
+const videoStorage=multer.diskStorage({
+  destination:(req,file,cb)=>cb(null,UPLOAD_DIR),
+  filename:(req,file,cb)=>{
+    const ext=path.extname(file.originalname).toLowerCase();
+    cb(null,crypto.randomUUID()+ext);
+  }
+});
+const uploadVideo=multer({
+  storage:videoStorage,
+  limits:{fileSize:500*1024*1024},
+  fileFilter:(req,file,cb)=>{
+    const allowed=["video/mp4","video/webm","video/ogg"];
+    const ext=path.extname(file.originalname).toLowerCase();
+    const allowedExt=[".mp4",".webm",".ogg"];
+    cb(null,allowed.includes(file.mimetype)&&allowedExt.includes(ext));
+  }
+}).single("video");
+
+function deleteUploadedFile(videoUrl){
+  if(!videoUrl||!videoUrl.startsWith("/uploads/"))return;
+  const filename=path.basename(videoUrl);
+  const full=path.join(UPLOAD_DIR,filename);
+  if(fs.existsSync(full))fs.unlinkSync(full);
+}
+
 function movieInput(body){
   const year=Number(body.year),rating=Number(body.rating);
   if(!cleanText(body.title,200)||!Number.isInteger(year)||year<1888||year>2200||!cleanText(body.genre,80)||
@@ -219,20 +250,51 @@ app.delete("/api/admin/users/:id",auth,admin,(req,res)=>{
   result.changes?res.json({message:"User deleted"}):res.status(404).json({message:"User not found"});
 });
 app.post("/api/admin/movies",auth,admin,(req,res)=>{
-  const m=movieInput(req.body);if(!m)return res.status(400).json({message:"Please provide valid movie details"});
-  const r=db.prepare("INSERT INTO movies(title,year,genre,rating,poster,backdrop,description,video_url,featured) VALUES(?,?,?,?,?,?,?,?,?)").run(m.title,m.year,m.genre,m.rating,m.poster,m.backdrop,m.description,m.video_url,m.featured?1:0);
-  res.status(201).json({id:Number(r.lastInsertRowid)});
+  uploadVideo(req,res,err=>{
+    if(err)return res.status(400).json({message:err.code==="LIMIT_FILE_SIZE"?"Video file is too large. Maximum size is 500 MB.":"Only MP4, WebM and OGG video files are supported."});
+    const body={...req.body};
+    if(req.file)body.video_url="/uploads/"+req.file.filename;
+    body.featured=body.featured==="true"||body.featured==="1"||body.featured===true;
+    const m=movieInput(body);
+    if(!m){if(req.file)deleteUploadedFile(body.video_url);return res.status(400).json({message:"Please provide valid movie details"});}
+    try{
+      const r=db.prepare("INSERT INTO movies(title,year,genre,rating,poster,backdrop,description,video_url,featured) VALUES(?,?,?,?,?,?,?,?,?)").run(m.title,m.year,m.genre,m.rating,m.poster,m.backdrop,m.description,m.video_url,m.featured?1:0);
+      res.status(201).json({id:Number(r.lastInsertRowid),video_url:m.video_url});
+    }catch(e){
+      if(req.file)deleteUploadedFile(body.video_url);
+      res.status(500).json({message:"Could not add movie"});
+    }
+  });
 });
 app.put("/api/admin/movies/:id",auth,admin,(req,res)=>{
-  const id=Number(req.params.id),m=movieInput(req.body);
-  if(!validId(id)||!m)return res.status(400).json({message:"Invalid movie data"});
-  const result=db.prepare("UPDATE movies SET title=?,year=?,genre=?,rating=?,poster=?,backdrop=?,description=?,video_url=?,featured=? WHERE id=?").run(m.title,m.year,m.genre,m.rating,m.poster,m.backdrop,m.description,m.video_url,m.featured?1:0,id);
-  result.changes?res.json({message:"Movie updated"}):res.status(404).json({message:"Movie not found"});
+  uploadVideo(req,res,err=>{
+    if(err)return res.status(400).json({message:err.code==="LIMIT_FILE_SIZE"?"Video file is too large. Maximum size is 500 MB.":"Only MP4, WebM and OGG video files are supported."});
+    const id=Number(req.params.id);
+    if(!validId(id))return res.status(400).json({message:"Invalid movie id"});
+    const existing=db.prepare("SELECT * FROM movies WHERE id=?").get(id);
+    if(!existing){if(req.file)deleteUploadedFile("/uploads/"+req.file.filename);return res.status(404).json({message:"Movie not found"});}
+    const body={...req.body,video_url:req.file?"/uploads/"+req.file.filename:cleanText(req.body.video_url||existing.video_url,2000)};
+    body.featured=body.featured==="true"||body.featured==="1"||body.featured===true;
+    const m=movieInput(body);
+    if(!m){if(req.file)deleteUploadedFile(body.video_url);return res.status(400).json({message:"Invalid movie data"});}
+    try{
+      const result=db.prepare("UPDATE movies SET title=?,year=?,genre=?,rating=?,poster=?,backdrop=?,description=?,video_url=?,featured=? WHERE id=?").run(m.title,m.year,m.genre,m.rating,m.poster,m.backdrop,m.description,m.video_url,m.featured?1:0,id);
+      if(req.file&&existing.video_url!==m.video_url)deleteUploadedFile(existing.video_url);
+      res.json({message:"Movie updated",video_url:m.video_url});
+    }catch(e){
+      if(req.file)deleteUploadedFile(m.video_url);
+      res.status(500).json({message:"Could not update movie"});
+    }
+  });
 });
 app.delete("/api/admin/movies/:id",auth,admin,(req,res)=>{
-  const result=db.prepare("DELETE FROM movies WHERE id=?").run(Number(req.params.id));
-  result.changes?res.json({message:"Movie deleted"}):res.status(404).json({message:"Movie not found"});
+  const id=Number(req.params.id);
+  const movie=db.prepare("SELECT video_url FROM movies WHERE id=?").get(id);
+  const result=db.prepare("DELETE FROM movies WHERE id=?").run(id);
+  if(result.changes){deleteUploadedFile(movie?.video_url);res.json({message:"Movie deleted"});}
+  else res.status(404).json({message:"Movie not found"});
 });
 
+app.use((err,req,res,next)=>{if(err instanceof multer.MulterError)return res.status(400).json({message:err.message});next(err)});
 app.use((req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.listen(PORT,()=>console.log("CineMax running on http://localhost:"+PORT));
